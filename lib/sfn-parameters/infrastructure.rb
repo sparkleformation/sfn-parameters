@@ -10,9 +10,8 @@ class Sfn
 
       # Update configuration after configuration is loaded
       #
-      # @param args [Object]
       # @return [NilClass]
-      def after_config_update(args)
+      def after_config_update(*_)
         config[:parameters] ||= Smash.new
         config[:compile_parameters] ||= Smash.new
         config[:apply_stack] ||= []
