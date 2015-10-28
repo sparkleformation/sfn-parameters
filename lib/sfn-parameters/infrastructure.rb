@@ -8,6 +8,10 @@ class Sfn
       # Valid file extensions for configuration file
       VALID_EXTENSIONS = ['.rb', '.xml', '.json', '.yaml', '.yml']
 
+      # Update configuration after configuration is loaded
+      #
+      # @param args [Object]
+      # @return [NilClass]
       def after_config_update(args)
         config[:parameters] ||= Smash.new
         config[:compile_parameters] ||= Smash.new
@@ -18,7 +22,9 @@ class Sfn
           raise ArgumentError.new "Expected stack configuration not found! (Expected key - #{stack_name})"
         end
         process_information_hash(content[stack_name], [stack_name])
+        nil
       end
+      alias_method :after_config_create, :after_config_update
 
       protected
 
