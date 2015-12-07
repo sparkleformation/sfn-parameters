@@ -61,7 +61,7 @@ class Sfn
           config[:compile_parameters][key] = value
         end
         hash.fetch(:stacks, {}).each do |key, value|
-          process_information_hash(value, [*path, value].compact)
+          process_information_hash(value, [*path, Bogo::Utility.camel(key)].compact)
         end
         hash.fetch(:apply_stacks, []).each do |s_name|
           config[:apply_stack] << s_name
