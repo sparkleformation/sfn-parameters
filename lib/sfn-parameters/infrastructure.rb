@@ -1,6 +1,6 @@
 require 'sfn-parameters'
 
-class Sfn
+module Sfn
   class Callback
     # Auto load stack parameters for infrastructure pattern
     class ParametersInfrastructure < Callback
@@ -17,10 +17,7 @@ class Sfn
         config[:apply_stack] ||= []
         stack_name = arguments.first
         content = load_file_for(stack_name)
-        unless(content.keys.map(&:to_s).include?(stack_name))
-          raise ArgumentError.new "Expected stack configuration not found! (Expected key - #{stack_name})"
-        end
-        process_information_hash(content[stack_name], [stack_name])
+        process_information_hash(content, [])
         nil
       end
       alias_method :after_config_create, :after_config_update
@@ -36,14 +33,13 @@ class Sfn
         isolation_name = config.fetch(:sfn_parameters, :destination,
           ENV.fetch('SFN_PARAMETERS_DESTINATION', 'default')
         )
-        directory = File.join(*[root_path, isolation_name].compact)
-        paths = Dir.glob(File.join(directory, "#{isolation_name}{#{VALID_EXTENSIONS.join(',')}}")).map(&:to_s)
+        paths = Dir.glob(File.join(root_path, "#{isolation_name}{#{VALID_EXTENSIONS.join(',')}}")).map(&:to_s)
         if(paths.size > 1)
           raise ArgumentError.new "Multiple parameter file matches encountered! (#{paths.join(', ')})"
         elsif(paths.empty?)
           raise ArgumentError.new 'No parameter file matches found!'
         end
-        Bogo::Config.new(:path => paths.first).data
+        Bogo::Config.new(paths.first).data
       end
 
       # Process the given hash and set configuration values
