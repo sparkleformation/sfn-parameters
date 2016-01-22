@@ -49,11 +49,11 @@ module Sfn
       # @return [TrueClass]
       def process_information_hash(hash, path=[])
         hash.fetch(:parameters, {}).each do |key, value|
-          key = [*path, Bogo::Utility.camel(key)].compact.map(&:to_s).join('_')
+          key = [*path, Bogo::Utility.camel(key)].compact.map(&:to_s).join('__')
           config[:parameters][key] = value
         end
         hash.fetch(:compile_parameters, {}).each do |key, value|
-          key = [*path, Bogo::Utility.camel(key)].compact.map(&:to_s).join('_')
+          key = [*path, Bogo::Utility.camel(key)].compact.map(&:to_s).join('__')
           config[:compile_parameters][key] = value
         end
         hash.fetch(:stacks, {}).each do |key, value|
