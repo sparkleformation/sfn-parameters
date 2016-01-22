@@ -10,6 +10,6 @@ Gem::Specification.new do |s|
   s.description = 'SparkleFormation Parameters Callback'
   s.license = 'Apache-2.0'
   s.require_path = 'lib'
-  s.add_dependency 'sfn', '>= 1.0.0', '< 2.0'
+  s.add_dependency 'sfn', '>= 1.0.0', '< 3.0'
   s.files = Dir['{lib,bin,docs}/**/*'] + %w(sfn-parameters.gemspec README.md CHANGELOG.md LICENSE)
 end
