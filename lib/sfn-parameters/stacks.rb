@@ -17,7 +17,7 @@ module Sfn
         elsif(paths.empty?)
           raise ArgumentError.new 'No parameter file matches found!'
         end
-        Bogo::Config.new(paths.first).data
+        unlock_content(Bogo::Config.new(paths.first).data)
       end
 
     end

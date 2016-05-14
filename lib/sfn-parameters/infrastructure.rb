@@ -5,6 +5,9 @@ module Sfn
     # Auto load stack parameters for infrastructure pattern
     class ParametersInfrastructure < Callback
 
+      include Sfn::Utils::JSON
+      include SfnParameters::Utils
+
       # Valid file extensions for configuration file
       VALID_EXTENSIONS = ['.rb', '.xml', '.json', '.yaml', '.yml']
 
@@ -39,7 +42,7 @@ module Sfn
         elsif(paths.empty?)
           raise ArgumentError.new 'No parameter file matches found!'
         end
-        Bogo::Config.new(paths.first).data
+        unlock_content(Bogo::Config.new(paths.first).data)
       end
 
       # Process the given hash and set configuration values
