@@ -15,9 +15,10 @@ module Sfn
         if(paths.size > 1)
           raise ArgumentError.new "Multiple parameter file matches encountered! (#{paths.join(', ')})"
         elsif(paths.empty?)
-          raise ArgumentError.new 'No parameter file matches found!'
+          Smash.new
+        else
+          unlock_content(Bogo::Config.new(paths.first).data)
         end
-        unlock_content(Bogo::Config.new(paths.first).data)
       end
 
     end
