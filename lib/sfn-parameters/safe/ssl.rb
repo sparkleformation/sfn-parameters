@@ -7,8 +7,6 @@ module SfnParameters
     # OpenSSL based Safe implementation
     class Ssl < Safe
 
-      # Default salt for key generation
-      CRYPT_SALT='sfn~parameters~crypt~salt'
       # Default cipher
       DEFAULT_CIPHER='AES-256-CBC'
       # Maximum computation iteration length
@@ -27,6 +25,9 @@ module SfnParameters
       # @return [self]
       def initialize(*_)
         super
+        unless(arguments[:salt])
+          arguments[:salt] = OpenSSL::Random.random_bytes(16)
+        end
         unless(arguments[:key])
           raise ArgumentError.new 'Required `:key` argument unset for `Safe::Ssl`!'
         end
@@ -37,7 +38,7 @@ module SfnParameters
       # @param value [String] value to lock
       # @return [Hash] locked content in form {:iv, :content}
       def lock(value)
-        cipher = build
+        cipher = build(arguments[:salt])
         new_iv = cipher.random_iv
         cipher.iv = new_iv
         result = cipher.update(value) + cipher.final
@@ -45,6 +46,7 @@ module SfnParameters
           :iv => Base64.urlsafe_encode64(new_iv),
           :cipher => arguments.fetch(:cipher, DEFAULT_CIPHER),
           :content => Base64.urlsafe_encode64(result),
+          :salt => Base64.urlsafe_encode64(arguments[:salt]),
           :sfn_parameters_lock => Bogo::Utility.snake(self.class.name.split('::').last)
         )
       end
@@ -53,13 +55,17 @@ module SfnParameters
       #
       # @param value [Hash] content to unlock
       # @option :value [String] :iv initialization vector value
+      # @option :value [String] :salt random salt value
       # @option :value [String] :content stored content
       # @return [String]
       def unlock(value)
         value = value.to_smash
         o_cipher = arguments[:cipher]
         arguments[:cipher] = value[:cipher] if value[:cipher]
-        cipher = build(Base64.urlsafe_decode64(value[:iv]))
+        cipher = build(
+          Base64.urlsafe_decode64(value[:salt]),
+          Base64.urlsafe_decode64(value[:iv])
+        )
         arguments[:cipher] = o_cipher
         string = Base64.urlsafe_decode64(value[:content])
         cipher.update(string) + cipher.final
@@ -70,13 +76,14 @@ module SfnParameters
       # Build a new cipher
       #
       # @param iv [String] initialization vector
+      # @param salt [String] random value
       # @return [OpenSSL::Cipher]
-      def build(iv=nil)
-        cipher = OpenSSL::Cipher.new(arguments.fetch(:cipher, DEFAULT_CIPHER))
+      def build(salt=nil, iv=nil)
+        cipher = OpenSSL::Cipher.new(arguments[:cipher] || DEFAULT_CIPHER)
         iv ? cipher.decrypt : cipher.encrypt
         key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(
           arguments[:key],
-          arguments.fetch(:salt, CRYPT_SALT),
+          salt,
           arguments.fetch(:iterations, CRYPT_ITER),
           arguments.fetch(:key_length, CRYPT_KEY_LENGTH)
         )

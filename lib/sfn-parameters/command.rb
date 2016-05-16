@@ -44,7 +44,7 @@ module Sfn
           content = load_json(File.read(item)).to_smash
           if(content[:sfn_parameters_lock])
             ui.print ui.color(' *', :bold)
-            ui.print " Unlocking #{ui.color(item, :bold)}... "
+            ui.print " Unlocking #{ui.color(item, :bold)} for display... "
             content = unlock_content(content)
             content.delete(:sfn_lock_enabled)
             ui.puts ui.color('unlocked', :green)
