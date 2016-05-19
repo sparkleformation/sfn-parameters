@@ -8,87 +8,127 @@ module Sfn
       include SfnParameters::Utils
       include Sfn::CommandModule::Base
 
+      # Default contents for new item creation
+      NEW_ITEM_DEFAULT = Smash.new(
+        :parameters => {},
+        :compile_parameters => {},
+        :apply_stacks => [],
+        :stacks => {}
+      )
+
       # Execute parameters action request
       def execute!
-        action, item = arguments[0,2]
+        action, item = arguments[0].to_s, arguments[1].to_s
         ui.info "Running parameters action #{ui.color(action.to_s, :bold)}"
-        case action.to_sym
-        when :lock
-          item = validate_item(item)
-          ui.print " Locking #{ui.color(item, :bold)}... "
-          content = load_json(File.read(item)).to_smash
-          if(content[:sfn_parameters_lock])
-            ui.puts ui.color('no-op', :yellow)
-            ui.warn "Item is already locked! (#{item})"
-          else
-            thing = lock_content(content)
-            val = format_json(thing)
-            File.write(item, val)
-            ui.puts ui.color('locked', :blue)
-          end
-        when :unlock
-          item = validate_item(item)
-          ui.print " Unlocking #{ui.color(item, :bold)}... "
-          content = load_json(File.read(item)).to_smash
-          if(content[:sfn_parameters_lock])
-            content = unlock_content(content)
-            content.delete(:sfn_lock_enabled)
-            File.write(item, format_json(content))
-            ui.puts ui.color('unlocked', :green)
-          else
-            ui.puts ui.color('no-op', :yellow)
-            ui.warn "Item is already unlocked! (#{item})"
-          end
-        when :show
-          item = validate_item(item)
-          content = load_json(File.read(item)).to_smash
-          if(content[:sfn_parameters_lock])
-            ui.print ui.color(' *', :bold)
-            ui.print " Unlocking #{ui.color(item, :bold)} for display... "
-            content = unlock_content(content)
-            content.delete(:sfn_lock_enabled)
-            ui.puts ui.color('unlocked', :green)
-          end
-          ui.puts format_json(content)
-        when :create, :edit
-          unless(ENV['EDITOR'])
-            raise ArgumentError.new '$EDITOR must be set for create/edit commands!'
-          end
-          begin
-            item = validate_item(item)
-          rescue ArgumentError
-            new_item = true
-            item = new_item(item)
-          end
-          FileUtils.mkdir_p(File.dirname(item))
-          tmp = Bogo::EphemeralFile.new('sfn-parameters')
-          content = new_item ? Smash.new : load_json(File.read(item)).to_smash
-          if(content[:sfn_parameters_lock])
-            ui.print ui.color(' *', :bold)
-            ui.print " Unlocking #{ui.color(item, :bold)} for edit... "
-            content = unlock_content(content)
-            ui.puts ui.color('unlocked', :green)
-          end
-          lock_enabled = content.delete(:sfn_lock_enabled) || new_item
-          tmp.write(format_json(content))
-          tmp.flush
-          system("#{ENV['EDITOR']} #{tmp.path}")
-          tmp.rewind
-          content = load_json(tmp.read).to_smash
-          ui.print ui.color(' *', :bold)
-          if(lock_enabled)
-            ui.print " Locking #{ui.color(item, :bold)} for storage... "
-            content = lock_content(content)
-            ui.puts ui.color('locked', :blue)
-          else
-            ui.puts " Storing #{ui.color(item, :bold)} for storage... #{ui.color('unlocked', :yellow)}"
-          end
-          File.write(item, format_json(content))
-          tmp.close
+        if(respond_to?("run_action_#{action}"))
+          send("run_action_#{action}", item)
         else
-          ArgumentError.new "Unsupported action received `#{action}`. " \
-            "Allowed: lock, unlock, show, create, edit"
+          allowed_actions = public_methods.grep(/^run_action/).sort.map do |item|
+            item.to_s.sub('run_action_', '')
+          end
+          raise ArgumentError.new "Unsupported action received `#{action}`. " \
+            "Allowed: #{allowed_actions.join(', ')}"
         end
+      end
+
+      # Perform locking on item
+      #
+      # @param item [String] item to lock
+      def run_action_lock(item)
+        item = validate_item(item)
+        ui.print " Locking #{ui.color(item, :bold)}... "
+        content = load_json(File.read(item)).to_smash
+        if(content[:sfn_parameters_lock])
+          ui.puts ui.color('no-op', :yellow)
+          ui.warn "Item is already locked! (#{item})"
+        else
+          thing = lock_content(content)
+          val = format_json(thing)
+          File.write(item, val)
+          ui.puts ui.color('locked', :blue)
+        end
+      end
+
+      # Perform unlocking on item
+      #
+      # @param item [String] item to lock
+      def run_action_unlock(item)
+        item = validate_item(item)
+        ui.print " Unlocking #{ui.color(item, :bold)}... "
+        content = load_json(File.read(item)).to_smash
+        if(content[:sfn_parameters_lock])
+          content = unlock_content(content)
+          content.delete(:sfn_lock_enabled)
+          File.write(item, format_json(content))
+          ui.puts ui.color('unlocked', :green)
+        else
+          ui.puts ui.color('no-op', :yellow)
+          ui.warn "Item is already unlocked! (#{item})"
+        end
+      end
+
+      # Perform show on item
+      #
+      # @param item [String] item to lock
+      def run_action_show(item)
+        item = validate_item(item)
+        content = load_json(File.read(item)).to_smash
+        if(content[:sfn_parameters_lock])
+          ui.print ui.color(' *', :bold)
+          ui.print " Unlocking #{ui.color(item, :bold)} for display... "
+          content = unlock_content(content)
+          content.delete(:sfn_lock_enabled)
+          ui.puts ui.color('unlocked', :green)
+        end
+        ui.puts format_json(content)
+      end
+
+      # Perform create on item
+      #
+      # @param item [String] item to lock
+      def run_action_create(item)
+        unless(ENV['EDITOR'])
+          raise ArgumentError.new '$EDITOR must be set for create/edit commands!'
+        end
+        begin
+          item = validate_item(item)
+        rescue ArgumentError
+          new_item = true
+          item = new_item(item)
+        end
+        FileUtils.mkdir_p(File.dirname(item))
+        tmp = Bogo::EphemeralFile.new('sfn-parameters')
+        content = new_item ? NEW_ITEM_DEFAULT : load_json(File.read(item)).to_smash
+        if(content[:sfn_parameters_lock])
+          ui.print ui.color(' *', :bold)
+          ui.print " Unlocking #{ui.color(item, :bold)} for edit... "
+          content = unlock_content(content)
+          ui.puts ui.color('unlocked', :green)
+        end
+        lock_enabled = content.delete(:sfn_lock_enabled) || new_item
+        tmp.write(format_json(content))
+        tmp.flush
+        system("#{ENV['EDITOR']} #{tmp.path}")
+        tmp.rewind
+        content = load_json(tmp.read).to_smash
+        ui.print ui.color(' *', :bold)
+        if(lock_enabled)
+          ui.print " Locking #{ui.color(item, :bold)} for storage... "
+          content = lock_content(content)
+          ui.puts ui.color('locked', :blue)
+        else
+          ui.puts " Storing #{ui.color(item, :bold)} for storage... #{ui.color('unlocked', :yellow)}"
+        end
+        File.write(item, format_json(content))
+        tmp.close
+      end
+
+      # Perform edit on item
+      #
+      # @param item [String] item to lock
+      def run_action_edit(item)
+        validate_item(item)
+        run_action_create(item)
       end
 
       # Expand path for new item if required
@@ -122,6 +162,9 @@ module Sfn
       # @param item [String]
       # @return [String]
       def validate_item(item)
+        if(item.to_s.empty?)
+          raise NameError.new 'Item name is required. No item name provided.'
+        end
         items = [
           item,
           File.join(
