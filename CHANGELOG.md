@@ -1,3 +1,6 @@
+# v0.2.2
+* Provide better UI feedback (#3)
+
 # v0.2.0
 * Add support for single stack workflow (#1)
 * Add encryption foundation with initial OpenSSL implementation (#2)
