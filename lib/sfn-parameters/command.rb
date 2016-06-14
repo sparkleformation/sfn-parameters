@@ -109,8 +109,7 @@ module Sfn
         tmp.write(format_json(content))
         tmp.flush
         system("#{ENV['EDITOR']} #{tmp.path}")
-        tmp.rewind
-        content = load_json(tmp.read).to_smash
+        content = load_json(File.read(tmp.path)).to_smash
         ui.print ui.color(' *', :bold)
         if(lock_enabled)
           ui.print " Locking #{ui.color(item, :bold)} for storage... "
