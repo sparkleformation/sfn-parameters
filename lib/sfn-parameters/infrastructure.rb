@@ -52,6 +52,9 @@ module Sfn
       # @param path [Array<String>] stack name hierarchy
       # @return [TrueClass]
       def process_information_hash(hash, path=[])
+        if(path.empty? && hash[:template])
+          config[:file] = hash[:template]
+        end
         hash.fetch(:parameters, {}).each do |key, value|
           key = [*path, Bogo::Utility.camel(key)].compact.map(&:to_s).join('__')
           config[:parameters][key] = value
