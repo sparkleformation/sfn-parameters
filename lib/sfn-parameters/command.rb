@@ -190,7 +190,7 @@ module Sfn
             ),
             "#{item}.json"
           )
-        ]
+        ].map{|item| File.expand_path(item) }.uniq
         valid = items.find_all do |file|
           File.exist?(file)
         end
