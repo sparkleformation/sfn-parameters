@@ -11,6 +11,11 @@ module Sfn
       # Valid file extensions for configuration file
       VALID_EXTENSIONS = ['.rb', '.xml', '.json', '.yaml', '.yml']
 
+      # @return [TrueClass] silence callback run notification
+      def quiet
+        config.fetch(:sfn_parameters, :quiet, false)
+      end
+
       # Update configuration after configuration is loaded
       #
       # @return [NilClass]
@@ -35,7 +40,7 @@ module Sfn
         isolation_name = config.fetch(:sfn_parameters, :destination,
           ENV.fetch('SFN_PARAMETERS_DESTINATION', 'default')
         )
-        unpack_file(parameters_directory, isolation_name)
+        expand_config_file(unpack_file(parameters_directory, isolation_name))
       end
 
       # Detect and expand defined definitions

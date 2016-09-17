@@ -10,7 +10,7 @@ module Sfn
       # @param stack_name [String]
       # @return [Smash]
       def load_file_for(stack_name)
-        unpack_file(parameters_directory, stack_name)
+        expand_config_file(unpack_file(parameters_directory, stack_name))
       end
 
       # Define parameters directory for stacks based files
