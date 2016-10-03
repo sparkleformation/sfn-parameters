@@ -97,7 +97,7 @@ module Sfn
           item = new_item(item)
         end
         FileUtils.mkdir_p(File.dirname(item))
-        tmp = Bogo::EphemeralFile.new('sfn-parameters')
+        tmp = Bogo::EphemeralFile.new(['sfn-parameters', '.json'])
         content = new_item ? NEW_ITEM_DEFAULT : load_json(File.read(item)).to_smash
         if(content[:sfn_parameters_lock])
           ui.print ui.color(' *', :bold)
