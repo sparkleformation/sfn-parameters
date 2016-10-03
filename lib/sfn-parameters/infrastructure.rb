@@ -60,7 +60,7 @@ module Sfn
           config[:parameters][key] = value
         end
         hash.fetch(:compile_parameters, {}).each do |key, value|
-          key = [*path, Bogo::Utility.camel(key)].compact.map(&:to_s).join('__')
+          key = [*path, key].compact.map(&:to_s).join('__')
           config[:compile_parameters][key] = value
         end
         hash.fetch(:stacks, {}).each do |key, value|
