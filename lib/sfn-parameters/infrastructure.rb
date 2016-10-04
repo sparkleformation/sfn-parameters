@@ -56,15 +56,23 @@ module Sfn
           config[:file] = hash[:template]
         end
         hash.fetch(:parameters, {}).each do |key, value|
-          key = [*path, Bogo::Utility.camel(key)].compact.map(&:to_s).join('__')
-          config[:parameters][key] = value
+          key = [*path, key].compact.map(&:to_s).join('__')
+          if(current_value = config[:parameters][key])
+            ui.debug "Not setting template parameter `#{key}`. Already set within config. (`#{current_value}`)"
+          else
+            config[:parameters][key] = value
+          end
         end
         hash.fetch(:compile_parameters, {}).each do |key, value|
           key = [*path, key].compact.map(&:to_s).join('__')
-          config[:compile_parameters][key] = value
+          if(current_value = config[:compile_parameters][key])
+            ui.debug "Not setting compile time parameter `#{key}`. Already set within config. (`#{current_value}`)"
+          else
+            config[:compile_parameters][key] = value
+          end
         end
         hash.fetch(:stacks, {}).each do |key, value|
-          process_information_hash(value, [*path, Bogo::Utility.camel(key)].compact)
+          process_information_hash(value, [*path, key].compact)
         end
         hash.fetch(:apply_stacks, []).each do |s_name|
           config[:apply_stack] << s_name
