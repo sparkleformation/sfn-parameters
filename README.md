@@ -47,6 +47,7 @@ The basic structure of the file in JSON:
   "parameters": {},
   "compile_parameters": {},
   "apply_stacks": [],
+  "mappings": {},
   "stacks": {}
 }
 ~~~
@@ -56,6 +57,7 @@ Break down of the keys:
 * `parameters` - Run time parameters sent to the orchestration API
 * `compile_parameters` - Compile time parameters used to generate the template
 * `apply_stacks` - List of stacks whose outputs should be applied
+* `mappings` - Hash of [STACK\_\_]old\_key new\_key to remap after apply\_stack
 * `stacks`- Nested stack information
 
 #### Infrastructure Mode
