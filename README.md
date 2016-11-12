@@ -48,7 +48,8 @@ The basic structure of the file in JSON:
   "compile_parameters": {},
   "apply_stacks": [],
   "mappings": {},
-  "stacks": {}
+  "stacks": {},
+  "template": "template_name"
 }
 ~~~
 
@@ -59,6 +60,7 @@ Break down of the keys:
 * `apply_stacks` - List of stacks whose outputs should be applied
 * `mappings` - Hash of [STACK\_\_]old\_key new\_key to remap after apply\_stack
 * `stacks`- Nested stack information
+* `template` - Template name for this stack
 
 #### Infrastructure Mode
 
