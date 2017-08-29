@@ -10,7 +10,7 @@ module Sfn
       # @param stack_name [String]
       # @return [Smash]
       def load_file_for(stack_name)
-        root_path = config.fetch(:sfn_parameters, :directory, 'stacks')
+        root_path = config.fetch(:sfn_parameters, :directory, 'stacks', '**')
         paths = Dir.glob(File.join(root_path, "#{stack_name}{#{VALID_EXTENSIONS.join(',')}}")).map(&:to_s)
         if(paths.size > 1)
           raise ArgumentError.new "Multiple parameter file matches encountered! (#{paths.join(', ')})"
