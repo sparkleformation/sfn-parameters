@@ -72,7 +72,7 @@ module Sfn
       # @param item [String] item to lock
       def run_action_show(item)
         item = validate_item(item)
-        content = load_json(File.read(item)).to_smash
+        content = Bogo::Config.new(item).data
         if(content[:sfn_parameters_lock])
           ui.print ui.color(' *', :bold)
           ui.print " Unlocking #{ui.color(item, :bold)} for display... "
