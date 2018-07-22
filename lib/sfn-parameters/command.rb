@@ -72,7 +72,7 @@ module Sfn
       # @param item [String] item to lock
       def run_action_show(item)
         item = validate_item(item)
-        content = load_json(File.read(item)).to_smash
+        content = Bogo::Config.new(item).data
         if(content[:sfn_parameters_lock])
           ui.print ui.color(' *', :bold)
           ui.print " Unlocking #{ui.color(item, :bold)} for display... "
@@ -164,33 +164,24 @@ module Sfn
         if(item.to_s.empty?)
           raise NameError.new 'Item name is required. No item name provided.'
         end
-        items = [
-          item,
-          File.join(
-            config.fetch(
-              :sfn_parameters, :directory, 'stacks'
+        items = [item]
+        ['', '.json', '.rb', '.xml', '.yaml', '.yml'].each do |extension|
+          items += [
+            File.join(
+              config.fetch(
+                :sfn_parameters, :directory, 'stacks'
+              ),
+              "#{item}#{extension}"
             ),
-            item
-          ),
-          File.join(
-            config.fetch(
-              :sfn_parameters, :directory, 'stacks'
-            ),
-            "#{item}.json"
-          ),
-          File.join(
-            config.fetch(
-              :sfn_parameters, :directory, 'infrastructure'
-            ),
-            item
-          ),
-          File.join(
-            config.fetch(
-              :sfn_parameters, :directory, 'infrastructure'
-            ),
-            "#{item}.json"
-          )
-        ].map{|item| File.expand_path(item) }.uniq
+            File.join(
+              config.fetch(
+                :sfn_parameters, :directory, 'infrastructure'
+              ),
+              "#{item}#{extension}"
+            )
+          ]
+        end
+        items.map!{ |item| File.expand_path(item) }.uniq
         valid = items.find_all do |file|
           File.exist?(file)
         end

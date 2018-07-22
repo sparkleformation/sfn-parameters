@@ -174,7 +174,8 @@ library. This allows defining the file in a serialization format
 ### Encryption
 
 This callback also supports encrypting stack parameter information for storage. The callback
-adds a `parameters` command for handling encryption/decryption.
+adds a `parameters` command for handling encryption/decryption. Encryption is currently only
+supported when using JSON format parameter files.
 
 #### Configuration
 
@@ -233,6 +234,12 @@ $ sfn parameters lock my-test-stack
 
 ~~~
 $ sfn parameters unlock my-test-stack
+~~~
+
+##### Show existing values (as JSON)
+
+~~~
+$ sfn parameters show my-test-stack
 ~~~
 
 _NOTE: Full paths can also be used when defining parameters file._
