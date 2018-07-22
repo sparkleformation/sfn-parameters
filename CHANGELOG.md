@@ -1,3 +1,7 @@
+# v0.2.6
+* Support all valid format types in show subcommand (#14)
+* Apply parameters for all commands (#17)
+
 # v0.2.4
 * Include `.json` extension on temp file (#8)
 * Add support for `mappings` (#9)
