@@ -6,11 +6,6 @@ RSpec::Core::RakeTask.new(:spec) do |task|
   task.rspec_opts = "--pattern test/rspecs/**{,/*/**}/*_rspec.rb"
 end
 
-Rake::TestTask.new do |test|
-  test.pattern = "test/**/*_spec.rb"
-  test.verbose = true
-end
-
 namespace :rufo do
   desc "Validate Ruby file formatting"
   task :validate => [] do
@@ -49,5 +44,4 @@ desc "Run all tests"
 task :default => [] do
   Rake::Task["rufo:validate"].invoke
   Rake::Task[:spec].invoke
-  Rake::Task[:test].invoke
 end
