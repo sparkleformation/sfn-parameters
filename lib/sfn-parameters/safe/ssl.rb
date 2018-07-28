@@ -60,6 +60,11 @@ module SfnParameters
       # @return [String]
       def unlock(value)
         value = value.to_smash
+        [:content, :iv, :salt].each do |key|
+          unless value[key]
+            raise ArgumentError.new("Missing required information `#{key}`")
+          end
+        end
         o_cipher = arguments[:cipher]
         arguments[:cipher] = value[:cipher] if value[:cipher]
         cipher = build(
