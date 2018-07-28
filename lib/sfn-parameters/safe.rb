@@ -1,10 +1,9 @@
-require 'sfn-parameters'
+require "sfn-parameters"
 
 module SfnParameters
   # Safe storage
   class Safe
-
-    autoload :Ssl, 'sfn-parameters/safe/ssl'
+    autoload :Ssl, "sfn-parameters/safe/ssl"
 
     # @return [Hash] safe configuration
     attr_reader :arguments
@@ -13,7 +12,7 @@ module SfnParameters
     #
     # @param args [Hash]
     # @return [self]
-    def initialize(args={})
+    def initialize(args = {})
       @arguments = args.to_smash
     end
 
@@ -40,17 +39,15 @@ module SfnParameters
       # @param args [Hash] arguments for safe instance
       # @option args [String] :type type of safe
       # @return [Safe]
-      def build(args={})
+      def build(args = {})
         args = args.to_smash
-        type = Bogo::Utility.camel(args.fetch(:type, 'ssl'))
-        if(const_defined?(type))
+        type = Bogo::Utility.camel(args.fetch(:type, "ssl"))
+        if const_defined?(type)
           const_get(type).new(args)
         else
           raise ArgumentError.new "Unknown safe type provided `#{type}`."
         end
       end
-
     end
-
   end
 end

@@ -1,4 +1,4 @@
-require 'sfn-parameters'
+require "sfn-parameters"
 
 module SfnParameters
   # Common helper methods
@@ -23,7 +23,7 @@ module SfnParameters
     # @return [Hash] unlocked content
     def unlock_content(content)
       content = content.to_smash
-      if(content[:sfn_parameters_lock])
+      if content[:sfn_parameters_lock]
         safe = SfnParameters::Safe.build(
           config.fetch(:sfn_parameters, :safe, Smash.new)
         )
@@ -32,6 +32,5 @@ module SfnParameters
         content
       end
     end
-
   end
 end

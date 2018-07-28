@@ -14,7 +14,7 @@ module Sfn
         paths = Dir.glob(File.join(root_path, "#{stack_name}{#{VALID_EXTENSIONS.join(",")}}")).map(&:to_s)
         if paths.size > 1
           raise ArgumentError.new "Multiple parameter file matches encountered! (#{paths.join(", ")})"
-        elsif (paths.empty?)
+        elsif paths.empty?
           Smash.new
         else
           unlock_content(Bogo::Config.new(paths.first).data)

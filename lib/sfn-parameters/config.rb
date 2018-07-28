@@ -1,4 +1,4 @@
-require 'sfn-parameters'
+require "sfn-parameters"
 
 module Sfn
   class Config

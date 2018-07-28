@@ -36,7 +36,8 @@ module Sfn
         root_path = config.fetch(:sfn_parameters, :directory, "infrastructure")
         isolation_name = config.fetch(
           :sfn_parameters, :destination,
-          ENV.fetch("SFN_PARAMETERS_DESTINATION", "default"))
+          ENV.fetch("SFN_PARAMETERS_DESTINATION", "default")
+        )
         paths = Dir.glob(File.join(root_path, "#{isolation_name}{#{VALID_EXTENSIONS.join(",")}}")).map(&:to_s)
         if paths.size > 1
           raise ArgumentError.new "Multiple parameter file matches encountered! (#{paths.join(", ")})"

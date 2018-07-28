@@ -1,4 +1,4 @@
-require 'sfn-parameters'
+require "sfn-parameters"
 
 module SfnParameters
   # Safe storage
@@ -8,11 +8,11 @@ module SfnParameters
     class Ssl < Safe
 
       # Default cipher
-      DEFAULT_CIPHER='AES-256-CBC'
+      DEFAULT_CIPHER = "AES-256-CBC"
       # Maximum computation iteration length
-      CRYPT_ITER=10000
+      CRYPT_ITER = 10000
       # Default length of generated key
-      CRYPT_KEY_LENGTH=32
+      CRYPT_KEY_LENGTH = 32
 
       # Create OpenSSL backed safe
       #
@@ -25,11 +25,11 @@ module SfnParameters
       # @return [self]
       def initialize(*_)
         super
-        unless(arguments[:salt])
+        unless arguments[:salt]
           arguments[:salt] = OpenSSL::Random.random_bytes(16)
         end
-        unless(arguments[:key])
-          raise ArgumentError.new 'Required `:key` argument unset for `Safe::Ssl`!'
+        unless arguments[:key]
+          raise ArgumentError.new "Required `:key` argument unset for `Safe::Ssl`!"
         end
       end
 
@@ -47,7 +47,7 @@ module SfnParameters
           :cipher => arguments.fetch(:cipher, DEFAULT_CIPHER),
           :content => Base64.urlsafe_encode64(result),
           :salt => Base64.urlsafe_encode64(arguments[:salt]),
-          :sfn_parameters_lock => Bogo::Utility.snake(self.class.name.split('::').last)
+          :sfn_parameters_lock => Bogo::Utility.snake(self.class.name.split("::").last),
         )
       end
 
@@ -78,7 +78,7 @@ module SfnParameters
       # @param iv [String] initialization vector
       # @param salt [String] random value
       # @return [OpenSSL::Cipher]
-      def build(salt=nil, iv=nil)
+      def build(salt = nil, iv = nil)
         cipher = OpenSSL::Cipher.new(arguments[:cipher] || DEFAULT_CIPHER)
         iv ? cipher.decrypt : cipher.encrypt
         key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(
@@ -91,7 +91,6 @@ module SfnParameters
         cipher.key = key
         cipher
       end
-
     end
   end
 end
