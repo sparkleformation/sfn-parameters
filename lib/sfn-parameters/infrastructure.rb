@@ -62,7 +62,7 @@ module Sfn
           if current_value = config[:parameters][key]
             ui.debug "Not setting template parameter `#{key}`. Already set within config. (`#{current_value}`)"
           else
-            config[:parameters][key] = value
+            config[:parameters][key] = resolve(value)
           end
         end
         hash.fetch(:compile_parameters, {}).each do |key, value|
@@ -70,7 +70,7 @@ module Sfn
           if current_value = config[:compile_parameters][key]
             ui.debug "Not setting compile time parameter `#{key}`. Already set within config. (`#{current_value}`)"
           else
-            config[:compile_parameters][key] = value
+            config[:compile_parameters][key] = resolve(value)
           end
         end
         hash.fetch(:stacks, {}).each do |key, value|
@@ -84,6 +84,24 @@ module Sfn
           config[:apply_stack] << s_name
         end
         true
+      end
+
+      def resolve(value)
+        if value.is_a?(Hash)
+          resolver = value.keys[0]
+          resolver_input = value[resolver]
+          resolver_class = "SfnParameters::Resolvers::#{Bogo::Utility.camel(resolver)}"
+          begin
+            require "sfn-parameters/resolvers/#{resolver}"
+            @resolvers ||= {}
+            @resolvers[resolver] = Kernel.const_get(resolver_class).new
+          rescue NameError, LoadError => e
+            raise "Resolver not found, check parameter file. #{e}"
+          end
+          @resolvers[resolver].resolve(resolver_input)
+        else
+          value
+        end
       end
     end
   end

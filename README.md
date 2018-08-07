@@ -11,6 +11,9 @@ parameter files. Current implementations:
 
 * OpenSSL
 
+Additionally there are parameter store resolvers available:
+* Parameter Store
+
 ## Usage
 
 Make the callback available by adding it to the bundle via the
@@ -169,6 +172,49 @@ library. This allows defining the file in a serialization format
     "networking"
   ]
 }
+~~~
+
+### Parameter Resolvers
+
+In addition to including parameters directly in files you can optionally use resolvers to retrieve or otherwise provide
+values.
+
+#### Parameter Store
+
+This resolver uses AWS Parameter Store to retrieve values and decrypt them if necessary. Credentials will be used via the
+AWS SDK (https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/setup-config.html)
+
+~~~json
+{
+  "parameters": {
+    "app_password": {
+      "parameter_store": "path-in-parameter-store"
+    }
+  }
+}
+~~~
+
+#### Contributing others
+
+To add resolvers other than those provided, include your class file in the `sfn-parameters/resolvers` folder. The
+file will be 'required' upon first use of the resolver. You must include a `resolve` method that returns the parameter value
+as a string. The name of your class must match the name of the class when 'camel cased'. Example:
+
+~~~ruby
+# parameter_store.rb
+module SfnParameters
+  module Resolvers
+    class ParameterStore
+
+      def initialization; end
+      
+      def resolve(value)
+        value
+      end
+
+    end
+  end 
+end
 ~~~
 
 ### Encryption
