@@ -63,7 +63,6 @@ module Sfn
             ui.debug "Not setting template parameter `#{key}`. Already set within config. (`#{current_value}`)"
           else
             config[:parameters][key] = resolve(value)
-            puts "GOT: #{config[:parameters][key]}"
           end
         end
         hash.fetch(:compile_parameters, {}).each do |key, value|
