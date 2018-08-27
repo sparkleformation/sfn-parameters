@@ -1,6 +1,7 @@
 require "sfn"
 
 module SfnParameters
+  autoload :Resolver, "sfn-parameters/resolver"
   autoload :Safe, "sfn-parameters/safe"
   autoload :Utils, "sfn-parameters/utils"
 end

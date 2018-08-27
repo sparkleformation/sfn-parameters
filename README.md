@@ -244,6 +244,57 @@ $ sfn parameters show my-test-stack
 
 _NOTE: Full paths can also be used when defining parameters file._
 
+## Extending functionality (Resolvers)
+
+Parameters can be fetched from remote locations using Resolvers. Resolvers
+allow parameter values to be dynamically loaded via customized implementations.
+
+### Resolver usage
+
+Parameter values will be loaded via a resolver when the value of the
+parameter is a hash which includes a `resolver` key. The `resolver` key
+identifies the name of the resolver which should be loaded. For example:
+
+~~~json
+{
+  "parameters": {
+    "stack_creator": {
+      "resolver": "my_resolver",
+      "custom_key": "custom_value"
+    }
+  }
+}
+~~~
+
+This will create an instance of the `MyResolver` class and will then
+call the `MyResolver#resolve` with the value `{"custom_key" => "custom_value"}`.
+
+### Resolver implementation
+
+New resolvers can be created by subclassing the `SfnParameters::Resolver`
+class and implementing a `#resolve` method. An optional `#setup` method
+is available for setting up the instance. This is called during instance
+creation and has the entire sfn configuration available via the `#config`
+method.
+
+~~~ruby
+require "sfn-parameters"
+
+class MyResolver < SfnParameters::Resolver
+  def setup
+    # any custom setup
+  end
+
+  def resolve(value)
+    if value["custom_key"] == "custom_value"
+      "spox"
+    else
+      "unknown"
+    end
+  end
+end
+~~~
+
 # Info
 
 * Repository: https://github.com/sparkleformation/sfn-parameters

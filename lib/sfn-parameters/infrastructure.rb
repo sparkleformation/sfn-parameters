@@ -4,6 +4,7 @@ module Sfn
   class Callback
     # Auto load stack parameters for infrastructure pattern
     class ParametersInfrastructure < Callback
+      include Bogo::Memoization
       include Sfn::Utils::JSON
       include SfnParameters::Utils
 
@@ -59,18 +60,18 @@ module Sfn
         end
         hash.fetch(:parameters, {}).each do |key, value|
           key = [*path, key].compact.map(&:to_s).join("__")
-          if current_value = config[:parameters][key]
+          if current_value = config.get(:parameters, key)
             ui.debug "Not setting template parameter `#{key}`. Already set within config. (`#{current_value}`)"
           else
-            config[:parameters][key] = value
+            config.set(:parameters, key, resolve(value))
           end
         end
         hash.fetch(:compile_parameters, {}).each do |key, value|
           key = [*path, key].compact.map(&:to_s).join("__")
-          if current_value = config[:compile_parameters][key]
+          if current_value = config.get(:compile_parameters, key)
             ui.debug "Not setting compile time parameter `#{key}`. Already set within config. (`#{current_value}`)"
           else
-            config[:compile_parameters][key] = value
+            config.set(:compile_parameters, key, resolve(value))
           end
         end
         hash.fetch(:stacks, {}).each do |key, value|
@@ -78,12 +79,39 @@ module Sfn
         end
         hash.fetch(:mappings, {}).each do |key, value|
           value = [*path, Bogo::Utility.camel(value)].compact.map(&:to_s).join("__")
-          config[:apply_mapping][key] = value
+          config.set(:apply_mapping, key, value)
         end
         hash.fetch(:apply_stacks, []).each do |s_name|
           config[:apply_stack] << s_name
         end
+        config[:apply_stack].uniq!
         true
+      end
+
+      # Load value via resolver if defined
+      #
+      # @param value [Object]
+      # @return [Object]
+      def resolve(value)
+        if value.is_a?(Hash) && value.to_smash.key?(:resolver)
+          value = value.to_smash
+          resolver_name = Bogo::Utility.camel(value.delete(:resolver))
+          resolver = load_resolver(resolver_name)
+          resolver.resolve(value)
+        else
+          value
+        end
+      end
+
+      # Load given resolver
+      #
+      # @param resolver_name [String]
+      # @return [Resolver]
+      def load_resolver(resolver_name)
+        memoize(resolver_name) do
+          klass = SfnParameters::Resolver.detect_resolver(resolver_name)
+          klass.new(config)
+        end
       end
     end
   end
