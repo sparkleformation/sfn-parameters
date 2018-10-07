@@ -312,6 +312,12 @@ class MyResolver < SfnParameters::Resolver
 end
 ~~~
 
+### Resolvers
+
+List of known resolvers for sfn-parameters:
+
+*
+
 # Info
 
 * Repository: https://github.com/sparkleformation/sfn-parameters
