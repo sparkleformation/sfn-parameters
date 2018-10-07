@@ -1,3 +1,6 @@
+# v0.3.0
+* Add support for custom Resolvers (#20)
+
 # v0.2.6
 * Support all valid format types in show subcommand (#14)
 * Apply parameters for all commands (#17)
