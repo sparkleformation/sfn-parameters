@@ -233,4 +233,112 @@ describe Sfn::Callback::ParametersInfrastructure do
       expect(first).to be(second)
     end
   end
+
+  describe "#extract_resolver_information" do
+    let(:value) { double("value") }
+
+    context "when value is not a hash" do
+      it "returns nil for the resolver" do
+        r, _ = instance.send(:extract_resolver_information, value)
+        expect(r).to be_nil
+      end
+
+      it "returns value when not a hash" do
+        _, v = instance.send(:extract_resolver_information, value)
+        expect(v).to eq(value)
+      end
+    end
+
+    context "when value is a hash" do
+      context "with multiple entries" do
+        let(:value) { {key1: 1, key2: 2} }
+
+        it "returns nil for the resolver" do
+          r, _ = instance.send(:extract_resolver_information, value)
+          expect(r).to be_nil
+        end
+
+        it "returns original value" do
+          _, v = instance.send(:extract_resolver_information, value)
+          expect(v).to eq(value)
+        end
+
+        context "and includes a resolver key with known resolver" do
+          let(:resolver) { double("resolver") }
+
+          before do
+            value[:resolver] = :test_resolver
+            allow(instance).to receive(:load_resolver).with("TestResolver").
+                                 and_return(resolver)
+          end
+
+          it "returns the resolver" do
+            r, _ = instance.send(:extract_resolver_information, value)
+            expect(r).to eq(resolver)
+          end
+
+          it "returns data hash without resolver key" do
+            _, d = instance.send(:extract_resolver_information, value)
+            expect(d[:key1]).to eq(1)
+            expect(d[:key2]).to eq(2)
+            expect(d).not_to include(:resolver)
+          end
+        end
+
+        context "includes a resolver key without known resolver" do
+          before do
+            value[:resolver] = :test_resolver
+            allow(instance).to receive(:load_resolver).with("TestResolver").
+                                 and_raise(NameError)
+          end
+
+          it "should raise an exception" do
+            expect {
+              instance.send(:extract_resolver_information, value)
+            }.to raise_error(NameError)
+          end
+        end
+      end
+
+      context "with single entry" do
+        let(:value) { {key: "value"} }
+
+        context "and no resolver matching key name" do
+          before {
+            allow(instance).to receive(:load_resolver).with("Key").
+                                 and_raise(NameError)
+          }
+
+          it "returns nil for the resolver" do
+            r, _ = instance.send(:extract_resolver_information, value)
+            expect(r).to be_nil
+          end
+
+          it "returns original value" do
+            _, v = instance.send(:extract_resolver_information, value)
+            expect(v).to eq(value)
+          end
+        end
+
+        context "and resolver matching key name" do
+          let(:resolver) { double("resolver") }
+
+          before {
+            allow(instance).to receive(:load_resolver).with("Key").
+                                 and_return(resolver)
+          }
+
+          it "returns the resolver" do
+            r, _ = instance.send(:extract_resolver_information, value)
+            expect(r).to eq(resolver)
+          end
+
+          it "returns the value of the hash" do
+            _, d = instance.send(:extract_resolver_information, value)
+            expect(d).to eq("value")
+          end
+        end
+      end
+    end
+  end
 end

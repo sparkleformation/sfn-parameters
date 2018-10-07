@@ -269,6 +269,23 @@ identifies the name of the resolver which should be loaded. For example:
 This will create an instance of the `MyResolver` class and will then
 call the `MyResolver#resolve` with the value `{"custom_key" => "custom_value"}`.
 
+If the value to resolve is not a complex value, the configuration can
+be reduced to a single key/value pair where the key is the name of the
+resolver, and the value is the value to be resolved. This would look like:
+
+~~~json
+{
+  "parameters": {
+    "stack_creator": {
+      "my_resolver": "custom_value"
+    }
+  }
+}
+~~~
+
+This will create an instance of the `MyResolver` class and will then
+call the `MyResolver#resolve` with the value `"custom_value"`.
+
 ### Resolver implementation
 
 New resolvers can be created by subclassing the `SfnParameters::Resolver`

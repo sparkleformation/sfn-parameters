@@ -93,14 +93,38 @@ module Sfn
       # @param value [Object]
       # @return [Object]
       def resolve(value)
-        if value.is_a?(Hash) && value.to_smash.key?(:resolver)
-          value = value.to_smash
-          resolver_name = Bogo::Utility.camel(value.delete(:resolver))
-          resolver = load_resolver(resolver_name)
+        resolver, value = extract_resolver_information(value)
+        if resolver
           resolver.resolve(value)
         else
           value
         end
+      end
+
+      # Extract resolver name and data from value object
+      #
+      # @param value [Object]
+      # @return [Resolver, Object]
+      def extract_resolver_information(value)
+        if value.is_a?(Hash)
+          if value.size == 1
+            begin
+              r_name, val = value.to_a.flatten
+              resolver = load_resolver(Bogo::Utility.camel(r_name))
+              return resolver, val
+            rescue NameError
+              return nil, value
+            end
+          elsif value.to_smash.key?(:resolver)
+            val = value.to_smash
+            r_name = val.delete(:resolver)
+            resolver = load_resolver(Bogo::Utility.camel(r_name))
+            return resolver, val
+          else
+            return nil, value
+          end
+        end
+        return nil, value
       end
 
       # Load given resolver
