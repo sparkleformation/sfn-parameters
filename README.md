@@ -316,7 +316,7 @@ end
 
 List of known resolvers for sfn-parameters:
 
-*
+* AWS Simple Systems Manager - Parameter Store (https://github.com/novu/sfn-ssm)
 
 # Info
 
