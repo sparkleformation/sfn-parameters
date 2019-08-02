@@ -60,6 +60,9 @@ describe Sfn::Callback::ParametersInfrastructure do
         :compile_parameters => Smash.new,
         :apply_stack => [],
         :apply_mapping => Smash.new,
+        :options => {
+          :tags => Smash.new
+        },
       )
     }
 
@@ -165,6 +168,15 @@ describe Sfn::Callback::ParametersInfrastructure do
       it "should camel case value in config" do
         instance.send(:process_information_hash, info_hash, path)
         expect(config[:apply_mapping][:first_key]).to eq("FirstValue")
+      end
+    end
+
+    context "with tags set" do
+      let(:info_hash) { Smash.new(:tags => {:tag_key => "value"}) }
+
+      it "should set tags" do
+        instance.send(:process_information_hash, info_hash, path)
+        expect(config[:options][:tags][:tag_key]).to eq("value")
       end
     end
   end

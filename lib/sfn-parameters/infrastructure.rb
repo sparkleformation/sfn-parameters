@@ -19,6 +19,7 @@ module Sfn
         config[:compile_parameters] ||= Smash.new
         config[:apply_stack] ||= []
         config[:apply_mapping] ||= Smash.new
+        config[:options][:tags] ||= Smash.new
         stack_name = arguments.first
         content = load_file_for(stack_name)
         process_information_hash(content, [])
@@ -80,6 +81,9 @@ module Sfn
         hash.fetch(:mappings, {}).each do |key, value|
           value = [*path, Bogo::Utility.camel(value)].compact.map(&:to_s).join("__")
           config.set(:apply_mapping, key, value)
+        end
+        hash.fetch(:tags, {}).each do |key, value|
+          config[:options].set(:tags, key, value)
         end
         hash.fetch(:apply_stacks, []).each do |s_name|
           config[:apply_stack] << s_name
