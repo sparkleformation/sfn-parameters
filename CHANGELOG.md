@@ -1,3 +1,6 @@
+# v0.3.2
+* Add support for setting options tags (#24)
+
 # v0.3.0
 * Add support for custom Resolvers (#20)
 
