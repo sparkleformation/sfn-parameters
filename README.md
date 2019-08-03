@@ -49,7 +49,11 @@ The basic structure of the file in JSON:
   "apply_stacks": [],
   "mappings": {},
   "stacks": {},
-  "template": "template_name"
+  "template": "template_name",
+  "options": {
+    "tags": {
+    }
+  }
 }
 ~~~
 
@@ -61,6 +65,8 @@ Break down of the keys:
 * `mappings` - Hash of [STACK\_\_]old\_key new\_key to remap after apply\_stack
 * `stacks`- Nested stack information
 * `template` - Template name for this stack
+* `options` - Extra options to set
+ * `tags` - Set stack tags
 
 #### Infrastructure Mode
 
